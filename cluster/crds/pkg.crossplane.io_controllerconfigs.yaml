@@ -1495,6 +1495,11 @@ spec:
                 description: 'ServiceAccountName is the name of the ServiceAccount
                   to use to run this pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                 type: string
+              terminationGracePeriodSeconds:
+                description: Amount of time the kubelet will wait after sending the
+                  first termination signal
+                format: int64
+                type: integer
               tolerations:
                 description: If specified, the pod's tolerations.
                 items:

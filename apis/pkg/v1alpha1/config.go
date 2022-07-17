@@ -131,6 +131,8 @@ type ControllerConfigSpec struct {
 	// List of container ports to expose on the container
 	// +optional
 	Ports []corev1.ContainerPort `json:"ports,omitempty"`
+	// Amount of time the kubelet will wait after sending the first termination signal
+	TerminationGracePeriodSeconds *int64 `json:"terminationGracePeriodSeconds,omitempty"`
 }
 
 // PodObjectMeta is metadata that is added to the Pods in a provider's
