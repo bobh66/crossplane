@@ -63,6 +63,12 @@ func withAdditionalPort(port corev1.ContainerPort) deploymentModifier {
 	}
 }
 
+func withTerminationGracePeriod(seconds *int64) deploymentModifier {
+	return func(d *appsv1.Deployment) {
+		d.Spec.Template.Spec.TerminationGracePeriodSeconds = seconds
+	}
+}
+
 const (
 	namespace = "ns"
 )
@@ -249,6 +255,17 @@ func TestBuildProviderDeployment(t *testing.T) {
 		},
 	}
 
+	var secs int64 = 60
+	cct := &v1alpha1.ControllerConfig{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: revisionWithCC.Name,
+		},
+		Spec: v1alpha1.ControllerConfigSpec{
+			Image:                         &ccImg,
+			TerminationGracePeriodSeconds: &secs,
+		},
+	}
+
 	cases := map[string]struct {
 		reason string
 		fields args
@@ -327,6 +344,19 @@ func TestBuildProviderDeployment(t *testing.T) {
 					"pkg.crossplane.io/provider": providerWithImage.GetName(),
 					"k":                          "v",
 				})),
+				svc: service(providerWithImage, revisionWithCC),
+			},
+		},
+		"TerminationGracePeriodSecondsCC": {
+			reason: "If a ControllerConfig is referenced and it species a TerminationGracePeriodSeconds it should be used.",
+			fields: args{
+				provider: providerWithImage,
+				revision: revisionWithCC,
+				cc:       cct,
+			},
+			want: want{
+				sa:  serviceaccount(revisionWithCC),
+				d:   deployment(providerWithImage, revisionWithCC.GetName(), ccImg, withTerminationGracePeriod(&secs)),
 				svc: service(providerWithImage, revisionWithCC),
 			},
 		},
